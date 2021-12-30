@@ -1,0 +1,82 @@
+plugins {
+	id 'org.springframework.boot' version '2.6.2'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'org.openapi.generator' version '4.2.2'
+	id 'java'
+}
+
+group = 'trader.client'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springdoc:springdoc-openapi-webmvc-core:1.5.9'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.5.9'
+    
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.1'
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
+   
+    implementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.29.1'
+    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.29.1'
+    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '2.29.1'
+    implementation group: 'com.google.guava', name: 'guava', version: '24.1-jre'
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    implementation ('io.springfox:springfox-swagger2:2.9.2')
+    {
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-annotations'
+    }
+    
+    implementation "javax.annotation:javax.annotation-api"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	compileOnly 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test'
+}
+
+apply plugin: 'org.openapi.generator'
+
+task buildTraderServiceClient(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+    generatorName = "java"
+    inputSpec = "$projectDir/src/main/resources/TraderApp.yaml".toString()
+    outputDir = "$buildDir/generated/trader".toString()
+    invokerPackage = "trader.client.clientservice.trader.api"
+    packageName = "trader.client.clientservice.trader"
+    apiPackage = "trader.client.clientservice.trader.client"
+    modelPackage = "trader.client.clientservice.trader.model"
+    configOptions = [
+            library          : 'webclient',
+            dateLibrary      : 'java8',
+            java8            : 'true',
+            delegatePattern  : 'true',
+            useBeanValidation: 'false',
+            generateModelDocumentation: 'false',
+            generateApiDocumentation: 'false'
+    ]
+    importMappings = [
+            Period: "java.time.Period",
+            Year: "java.time.Year",
+            YearMonth: "java.time.YearMonth"
+    ]
+    typeMappings = [
+            'x-date-duration': "Period",
+            'x-year': "Year",
+            'x-year-month': "YearMonth"
+    ]
+}
+
+sourceSets.main.java.srcDir("/build/generated/trader/src/main/java")
+
+
+compileJava.dependsOn tasks.buildTraderServiceClient
+
+
+test {
+	useJUnitPlatform()
+}
