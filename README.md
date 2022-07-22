@@ -1,7 +1,6 @@
 # TraderReactiveClient
 
 Creates a dashboard from TraderServer with using 
-
 -legacy RestTemplate and 
 -Reactive WebClient
 
